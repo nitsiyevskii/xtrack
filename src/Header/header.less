@@ -1,0 +1,15 @@
+@bg-image: url('../header_background_image.jpeg');
+
+.headerContainer {
+    @media screen and (max-width:600px){
+        width: auto;
+        height: auto;
+        background: none;
+        padding: 5 px;
+    }
+    padding: 40px 50px 10px 50px;
+    background-image: @bg-image;
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size: 100% 400px;
+}
