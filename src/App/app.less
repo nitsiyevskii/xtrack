@@ -1,5 +1,15 @@
 body {
     overflow-x: hidden;
-    display: flex;
+    overflow-y: scroll;
     justify-content: center;
+    padding-left: 15%;
+    padding-right: 15%;
+    width: 100%;
+    @media screen and (max-width: 760px) {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+a, a:hover, a:active, a:focus {
+    text-decoration: none;
 }

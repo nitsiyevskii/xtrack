@@ -3,7 +3,9 @@ import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import { Link } from 'react-router-dom'
 import './header.less';
+
 export function Header() {
     return (
         <React.Fragment>
@@ -18,14 +20,18 @@ export function Header() {
                 <div>
                     <Grid container spacing={16} justify="center">
                         <Grid item>
-                            <Button variant="contained" color="secondary">
-                                Sign up
-                            </Button>
+                            <Link to="/signup">
+                                <Button variant="contained" color="secondary">
+                                    Sign up
+                                </Button>
+                            </Link>
                         </Grid>
                         <Grid item>
-                            <Button variant="outlined" color="secondary">
-                                Sign in
-                            </Button>
+                            <Link to="/signin">
+                                <Button variant="outlined" color="secondary">
+                                    Sign in
+                                </Button>
+                            </Link>
                         </Grid>
                     </Grid>
                 </div>
