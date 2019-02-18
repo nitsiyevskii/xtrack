@@ -1,7 +1,14 @@
 import * as React from 'react'
-import { GridList, GridListTile, Grid, GridListTileBar, IconButton } from '@material-ui/core';
+import {
+    GridList, Typography, Grid, GridListTileBar, IconButton, Button, Dialog, DialogTitle,
+    DialogContent, DialogContentText, TextField, DialogActions, Fab
+} from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import { withStyles, createStyles, Theme, WithStyles } from '@material-ui/core/styles';
+import ActionTypes from '../_actions/albums.actionTypes'
+import { connect } from 'react-redux'
+import { bindActionCreators, Dispatch } from 'redux'
+import { albumsActions } from '../_actions/albums.action'
 
 const styles = (theme: Theme) => createStyles({
     albumIcon: {
@@ -12,10 +19,11 @@ const styles = (theme: Theme) => createStyles({
         paddingTop: 20
     },
     albumGridList: {
-        overflow: 'hidden', 
-        flex: 1, 
-        justifyContent: "center", 
+        overflow: 'hidden',
+        flex: 1,
+        justifyContent: "center",
         paddingBottom: 10,
+        paddingTop: 20,
         margin: 0,
     },
     albumGridListElem: {
@@ -33,296 +41,108 @@ const styles = (theme: Theme) => createStyles({
         width: '100%'
     },
     albumGridListDescElem: {
-        marginBottom:4
+        marginBottom: 4
     },
+    albumTitle: {
+        flexGrow: 1
+    }
 });
 
-export interface propsAlbum extends WithStyles<typeof styles> {
+interface PropsLocation extends Location {
+    albumTitle: string
+}
+interface PropsAlbum extends WithStyles<typeof styles> {
     id: number
+    location: PropsLocation
+    photos: Array<any>
+    signin: boolean
+    photoUploaded: boolean
+    getPhotos: (albumId: number) => void
+    uploadPhoto: (description: string, photo: File) => void
+    uploaded: () => void
+    match: any
+
+}
+interface AlbumState {
+    photos: Array<any>,
+    showPhotoDialog: boolean
+    description: string
+    photo: File
+}
+interface DispatchFromProps {
+    getPhotos: (albumId: number) => void
+    uploadPhoto: (description: string, photo: File) => void
+    uploaded: () => void
+}
+interface StateToProps {
+    albums: any
+    user: any
 }
 
-const photosData = [
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    },
-    {
-        "albumId": 1,
-        "author": 1,
-        "title": "accusamus beatae ad facilis cum similique qui sunt",
-        "img": "https://via.placeholder.com/600/92c952",
-        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-    },
-    {
-        "albumId": 1,
-        "author": 2,
-        "title": "reprehenderit est deserunt velit ipsam",
-        "img": "https://via.placeholder.com/600/771796",
-        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-    },
-    {
-        "albumId": 1,
-        "author": 3,
-        "title": "officia porro iure quia iusto qui ipsa ut modi",
-        "img": "https://via.placeholder.com/600/24f355",
-        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-    }, ]
-
-class Album extends React.Component<propsAlbum> {
-    constructor(props: propsAlbum) {
+class Album extends React.Component<PropsAlbum, AlbumState> {
+    constructor(props: PropsAlbum) {
         super(props)
+        this.state = {
+            photos: [],
+            showPhotoDialog: false,
+            description: '',
+            photo: null
+        }
+    }
+
+    componentDidMount() {
+        const albumId = this.props.match.params.id
+        this.props.getPhotos(albumId)
+    }
+
+    handleOpenPhotoDialog = () => {
+        this.setState({
+            showPhotoDialog: true
+        })
+    }
+
+    handleClosePhotoDialog = () => {
+        this.setState({
+            showPhotoDialog: false
+        })
+    }
+
+    handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i
+        if (allowedExtensions.exec(e.currentTarget.value)) {
+            this.setState({
+                photo: e.currentTarget.files[ 0 ]
+            })
+        } else {
+            e.currentTarget.value = ''
+        }
+    }
+
+    handleUploadClick = () => {
+        if (this.state.description && this.state.photo) {
+            this.setState({
+                showPhotoDialog: false
+            })
+            this.props.uploadPhoto(this.state.description, this.state.photo)
+        }
+
+    }
+
+    uploaded = () => {
+        this.props.uploaded()
+    }
+
+    handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            description: e.currentTarget.value
+        })
     }
 
     render() {
-        const { classes } = this.props
+        let { classes, photos, signin, photoUploaded } = this.props
+        let { albumTitle } = this.props.location
+        albumTitle = albumTitle ? 'Album: ' + albumTitle : 'Album'
+        photos = photos ? photos : []
         return (
             <Grid
                 justify="space-around"
@@ -331,20 +151,65 @@ class Album extends React.Component<propsAlbum> {
                 direction="row"
                 className={classes.albumGrid}
                 container>
+                <div style={{ display: 'flex', justifyContent: 'space-around', padding: 10 }}>
+                    <div style={{ flexGrow: 1 }}></div>
+                    <Typography className={classes.albumTitle} variant="h5" component="h2">
+                        {albumTitle}
+                    </Typography>
+
+                    {signin &&
+                        <div>
+                            <Button variant="outlined" color="primary" onClick={this.handleOpenPhotoDialog}>
+                                + Add Photo
+                            </Button>
+                            <Dialog
+                                open={this.state.showPhotoDialog}
+                                onClose={this.handleClosePhotoDialog}
+                                aria-labelledby="form-dialog-title"
+                            >
+                                <DialogTitle id="form-dialog-title">Add image</DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>
+                                        Choose image and add some description to it.
+                                    </DialogContentText>
+                                    <TextField
+                                        autoFocus
+                                        margin="dense"
+                                        id="name"
+                                        label="Description"
+                                        type="text"
+                                        fullWidth
+                                        onChange={this.handleDescriptionChange}
+                                    />
+                                    <input className="fileInput" type="file" onChange={this.handleImageChange} />
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={this.handleClosePhotoDialog} color="primary">
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={this.handleUploadClick} color="primary">
+                                        Upload
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        </div>
+                    }
+                </div>
+                {photoUploaded && setTimeout(this.uploaded, 5000) && <h1>Uploaded!</h1>}
                 <GridList className={classes.albumGridList}>
-                    {photosData.map((photaData, id) => (
+                    {photos.map((photo, id) => (
                         <div key={id} style={{
-                                                width: '200px', 
-                                                height: 'auto'
-                                            }}
+                            width: '200px',
+                            height: 'auto'
+                        }}
                         >
-                            <li style={{flexGrow: 1}}>
+                            <li style={{ flexGrow: 1 }}>
                                 <div className={classes.albumGridListElem}>
-                                    <img src={photaData.thumbnailUrl} className={classes.albumGridListElemImg} />
+                                    <img src={photo.thumbnailUrl} className={classes.albumGridListElemImg} />
                                     <GridListTileBar
                                         className={classes.albumGridListDescElem}
-                                        title={photaData.title}
-                                        subtitle={<span>by: {photaData.author}</span>}
+                                        title={photo.title}
+                                        subtitle={<span>by: {photo.author}</span>}
                                         actionIcon={
                                             <IconButton className={classes.albumIcon}>
                                                 <InfoIcon />
@@ -361,4 +226,19 @@ class Album extends React.Component<propsAlbum> {
     }
 }
 
-export default withStyles(styles)(Album);
+function mapStateToProps(state: StateToProps) {
+    return {
+        ...state.albums,
+        ...state.user
+    };
+}
+
+function mapDispatchToProps(dispatch: Dispatch<ActionTypes>): DispatchFromProps {
+    return {
+        getPhotos: bindActionCreators(albumsActions.getPhotos, dispatch),
+        uploadPhoto: bindActionCreators(albumsActions.uploadPhoto, dispatch),
+        uploaded: bindActionCreators(albumsActions.uploaded, dispatch)
+    };
+}
+
+export default connect<AlbumState, DispatchFromProps, void>(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Album));

@@ -12,7 +12,6 @@ import thunkMiddleware from 'redux-thunk';
 import { reducers } from './_reducers';
 
 const store = createStore(reducers, applyMiddleware(thunkMiddleware))
-
 ReactDOM.render(
     <Provider store={store}>
         <BrowserRouter>

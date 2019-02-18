@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { Header } from '../Header/Header'
+import Header from '../Header/Header'
 import NavigationBar from '../NavigationBar/NavigationBar'
 import './app.less';
 
-export interface appProps { children: React.ReactChild }
+interface appProps { children: React.ReactChild }
 
 export function App(props: appProps) {
     return (

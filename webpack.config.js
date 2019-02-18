@@ -1,17 +1,18 @@
 
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const path = require('path');
 module.exports = {
     entry: './src/index.tsx',
     output: {
         filename: "bundle.js",
-        path: __dirname + "/dist",
+        path: path.join(__dirname + '/dist'),
         publicPath: '/'
     },
+    devtool: 'source-map',
     resolve: {
         extensions: [ '.js', '.css', '.tsx', '.ts', '.json' ]
     },
-    devtool: 'source-map',
     module: {
         rules: [
             {
@@ -53,8 +54,7 @@ module.exports = {
                     {
                         loader: 'image-webpack-loader',
                         options: {
-                            bypassOnDebug: true, // webpack@1.x
-                            disable: true, // webpack@2.x and newer
+                            disable: true
                         },
                     }
                 ]

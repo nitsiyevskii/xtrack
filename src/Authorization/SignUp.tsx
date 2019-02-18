@@ -3,6 +3,11 @@ import { Avatar, Button, CssBaseline, FormControl, Input, InputLabel, Paper, Typ
 import SettingsOutlined from '@material-ui/icons/SettingsOutlined';
 import { withStyles, createStyles, Theme, WithStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux'
+import { bindActionCreators, Dispatch } from 'redux'
+import { userActions } from '../_actions/user.action'
+import UserActionTypes from '../_actions/user.actionTypes'
+import { Redirect } from 'react-router'
 
 const styles = (theme: Theme) => createStyles({
     main: {
@@ -36,54 +41,118 @@ const styles = (theme: Theme) => createStyles({
     },
 });
 
-export interface SignUpProps extends WithStyles<typeof styles> { }
 
-function SignUp(props: SignUpProps) {
-    const { classes } = props;
+interface SignUpState {
+    username: string
+    password: string
+    redirect: boolean
+}
+interface SignUpProps extends WithStyles<typeof styles> {
+    error: string
+    register: (username: string) => void
+}
 
-    return (
-        <main className={classes.main}>
-            <CssBaseline />
-            <Paper className={classes.paper}>
-                <Avatar className={classes.avatar}>
-                    <SettingsOutlined />
-                </Avatar>
-                <Typography component="h1" variant="h5">
-                    Sign up
-                </Typography>
-                <form className={classes.form}>
-                    <FormControl margin="normal" required fullWidth>
-                        <InputLabel htmlFor="username">Username</InputLabel>
-                        <Input id="username" name="username" autoFocus />
-                    </FormControl>
-                    <FormControl margin="normal" required fullWidth>
-                        <InputLabel htmlFor="password">Password</InputLabel>
-                        <Input name="password" id="password" />
-                    </FormControl>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        className={classes.submit}
-                    >
-                        Register
-                    </Button>
-                    <Link to="/">
+interface DispatchFromProps {
+    register: (username: string) => void
+}
+interface StateToProps {
+    user: any
+}
+
+
+class SignUp extends React.Component<SignUpProps, SignUpState> {
+    constructor(props: SignUpProps) {
+        super(props)
+        this.state = {
+            username: '',
+            password: '',
+            redirect: false
+        }
+    }
+    handleRegisterClick = (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault()
+        const { username, password } = this.state
+        if (username && password) {
+            this.props.register(username)
+            this.setState({
+                redirect: true
+            })
+        }
+    }
+    handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            username: e.currentTarget.value
+        })
+    }
+    handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            password: e.currentTarget.value
+        })
+    }
+    render() {
+        const { classes } = this.props
+        if (this.state.redirect) {
+            return (
+                <Redirect to="/" />
+            )
+        }
+        return (
+            <main className={classes.main}>
+                <CssBaseline />
+                <Paper className={classes.paper}>
+                    <Avatar className={classes.avatar}>
+                        <SettingsOutlined />
+                    </Avatar>
+                    <Typography component="h1" variant="h5">
+                        Sign up
+                    </Typography>
+                    <form className={classes.form}>
+                        <FormControl margin="normal" required fullWidth>
+                            <InputLabel htmlFor="username">Username</InputLabel>
+                            <Input name="username" onChange={this.handleUsernameChange} autoFocus />
+                        </FormControl>
+                        <FormControl margin="normal" required fullWidth>
+                            <InputLabel htmlFor="password">Password</InputLabel>
+                            <Input name="password" onChange={this.handlePasswordChange} />
+                        </FormControl>
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
-                            color="default"
+                            color="primary"
                             className={classes.submit}
+                            onClick={this.handleRegisterClick}
                         >
-                            Back
+                            Register
                         </Button>
-                    </Link>
-                </form>
-            </Paper>
-        </main>
-    );
+                        <Link to="/">
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                color="default"
+                                className={classes.submit}
+                            >
+                                Back
+                            </Button>
+                        </Link>
+                    </form>
+                </Paper>
+            </main>
+        );
+    }
 }
 
-export default withStyles(styles)(SignUp);
+function mapStateToProps(state: StateToProps) {
+    return {
+        ...state.user
+    };
+}
+
+function mapDispatchToProps(dispatch: Dispatch<UserActionTypes>): DispatchFromProps {
+    return {
+        register: bindActionCreators(userActions.register, dispatch)
+    };
+}
+
+export default connect<{}, DispatchFromProps, void>(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SignUp))
